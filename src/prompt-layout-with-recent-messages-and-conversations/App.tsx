@@ -91,7 +91,7 @@ export default function Component() {
       const errorMessage: Message = {
         role: "assistant",
         content: `Üzgünüm, isteğinizi işlerken bir hata oluştu. Hata detayları: ${
-          error.message || "bilinmeyen hata"
+          (error instanceof Error ? error.message : "bilinmeyen hata")
         }`,
         avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatar_ai.png",
         name: "Dersitech",
