@@ -11,7 +11,7 @@ export default function LoginComponent() {
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
 
-  // Check if user is already logged in
+  // Kullanıcının zaten giriş yapmış olup olmadığını kontrol et
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
@@ -30,7 +30,7 @@ export default function LoginComponent() {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    console.log("Query Payload:", { email, password }); // Log the query payload
+    console.log("Gönderilen Veri:", { email, password }); // Gönderilen veriyi kaydet
 
     try {
         const response = await fetch("https://derstech-backend.onrender.com/api/v1/auth/authenticate", {
@@ -42,23 +42,23 @@ export default function LoginComponent() {
         });
 
         if (!response.ok) {
-            throw new Error("Invalid email or password.");
+            throw new Error("Geçersiz e-posta veya şifre.");
         }
 
         const data = await response.json();
-        console.log("Login successful:", data); // Log the entire response
-        console.log("Token:", data.token); // Log the token
+        console.log("Giriş başarılı:", data); // Yanıtı kaydet
+        console.log("Token:", data.token); // Token'ı kaydet
 
-        // Save the token to local storage or a secure place
+        // Token'ı local storage'a veya güvenli bir yere kaydet
         localStorage.setItem("authToken", data.token);
 
-        // Redirect or update the UI as needed
-        window.location.href = "/assistant"; // Redirect to assistant page
+        // Gerekirse yeniden yönlendirin veya UI'ı güncelleyin
+        window.location.href = "/assistant"; // Asistan sayfasına yönlendir
     } catch (error) {
         if (error instanceof Error) {
-            setErrorMessage(error.message || "Something went wrong. Please try again.");
+            setErrorMessage(error.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
         } else {
-            setErrorMessage("Something went wrong. Please try again.");
+            setErrorMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
         }
     } finally {
         setLoading(false);
@@ -71,22 +71,22 @@ export default function LoginComponent() {
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-large">
         <div className="flex flex-col items-center pb-6">
           <AcmeIcon size={60} />
-          <p className="text-xl font-medium">Welcome Back</p>
-          <p className="text-small text-default-500">Log in to your account to continue</p>
+          <p className="text-xl font-medium">Tekrar Hoş Geldiniz</p>
+          <p className="text-small text-default-500">Devam etmek için hesabınıza giriş yapın</p>
         </div>
         <Form className="flex flex-col gap-3" validationBehavior="native" onSubmit={handleSubmit}>
           <Input
             isRequired
-            label="Email Address"
+            label="E-posta Adresi"
             name="email"
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             type="email"
             variant="bordered"
           />
           <Input
             isRequired
             endContent={
-              <button type="button" onClick={toggleVisibility} aria-label="Toggle Password Visibility">
+              <button type="button" onClick={toggleVisibility} aria-label="Şifre Görünürlüğünü Değiştir">
                 {isVisible ? (
                   <Icon
                     className="pointer-events-none text-2xl text-default-400"
@@ -100,28 +100,28 @@ export default function LoginComponent() {
                 )}
               </button>
             }
-            label="Password"
+            label="Şifre"
             name="password"
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin"
             type={isVisible ? "text" : "password"}
             variant="bordered"
           />
           <div className="flex w-full items-center justify-between px-1 py-2">
             <Checkbox name="remember" size="sm">
-              Remember me
+              Beni Hatırla
             </Checkbox>
             <Link className="text-default-500" href="#" size="sm">
-              Forgot password?
+              Şifrenizi mi unuttunuz?
             </Link>
           </div>
           {errorMessage && <p className="text-red-500 text-small">{errorMessage}</p>}
           <Button className="w-full" color="primary" type="submit" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
           </Button>
         </Form>
         <div className="flex items-center gap-4 py-2">
           <Divider className="flex-1" />
-          <p className="shrink-0 text-tiny text-default-500">OR</p>
+          <p className="shrink-0 text-tiny text-default-500">YA DA</p>
           <Divider className="flex-1" />
         </div>
         <div className="flex flex-col gap-2">
@@ -129,19 +129,19 @@ export default function LoginComponent() {
             startContent={<Icon icon="flat-color-icons:google" width={24} />}
             variant="bordered"
           >
-            Continue with Google
+            Google ile Devam Et
           </Button>
           <Button
             startContent={<Icon className="text-default-500" icon="fe:github" width={24} />}
             variant="bordered"
           >
-            Continue with Github
+            Github ile Devam Et
           </Button>
         </div>
         <p className="text-center text-small">
-          Need to create an account?&nbsp;
+          Henüz bir hesabınız yok mu?&nbsp;
           <Link href="#" size="sm">
-            Sign Up
+            Kaydol
           </Link>
         </p>
       </div>
