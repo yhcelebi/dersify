@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   ScrollShadow,
   Dropdown,
@@ -28,6 +29,14 @@ export default function Component() {
   const [inputValue, setInputValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken")
+    if (!token) {
+      navigate("/login")
+    }
+  }, [navigate])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -41,8 +50,7 @@ export default function Component() {
     const userMessage: Message = {
       role: "user",
       content: inputValue,
-      avatar:
-        "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/3a906b3de8eaa53e14582edf5c918b5d.jpg",
+      avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/3a906b3de8eaa53e14582edf5c918b5d.jpg",
       name: "Sen",
     }
 
@@ -52,35 +60,62 @@ export default function Component() {
     const userInput = inputValue
     setInputValue("")
 
+    const token = localStorage.getItem("authToken")
+    if (!token) {
+      navigate("/login")
+      return
+    }
+
     try {
       const response = await fetch(
         `https://derstech-backend.onrender.com/api/v1/demo/query?id=1&query=${encodeURIComponent(userInput)}`,
         {
-          method: "GET",
-          headers: { Accept: "application/json" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "text/event-stream",
+          },
         },
       )
 
-      const responseText = await response.text()
-      console.log("Ham yanıt:", responseText)
-
-      let data
-      try {
-        data = JSON.parse(responseText)
-      } catch (jsonError) {
-        throw new Error(`Geçersiz JSON yanıtı: ${responseText}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const aiMessage: Message = {
-        role: "assistant",
-        content: data.response || "Yanıt alınamadı",
-        avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatar_ai.png",
-        name: "Dersitech",
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error("ReadableStream not supported")
       }
 
-      setMessages((prevMessages) => [...prevMessages, aiMessage])
+      let fullResponse = ""
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        let chunk = decoder.decode(value, { stream: true })
+        chunk = chunk.replace(/^data:/, "").trim()
+        fullResponse += chunk
+
+        setMessages((prevMessages) => {
+          const newMessages = [...prevMessages]
+          const lastMessage = newMessages[newMessages.length - 1]
+          if (lastMessage && lastMessage.role === "assistant") {
+            lastMessage.content = fullResponse.trim()
+          } else {
+            newMessages.push({
+              role: "assistant",
+              content: fullResponse.trim(),
+              avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatar_ai.png",
+              name: "Dersitech",
+            })
+          }
+          return newMessages
+        })
+      }
     } catch (error) {
-      console.error("Yanıt alınırken bir hata oluştu:", error)
+      console.error("Error fetching response:", error)
+      setIsLoading(false)
 
       const errorMessage: Message = {
         role: "assistant",
