@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
@@ -60,14 +62,15 @@ export default function Component() {
     setInputValue("")
 
     const token = localStorage.getItem("authToken")
-    if (!token) {
+    const userId = localStorage.getItem("userId")
+    if (!token || !userId) {
       navigate("/login")
       return
     }
 
     try {
       const response = await fetch(
-        `https://derstech-backend.onrender.com/api/v1/demo/query?id=1&query=${encodeURIComponent(userInput)}`,
+        `https://derstech-backend.onrender.com/api/v1/demo/query?id=${userId}&query=${encodeURIComponent(userInput)}`,
         {
           method: "GET",
           headers: {
@@ -214,3 +217,4 @@ export default function Component() {
     </div>
   )
 }
+
