@@ -140,7 +140,7 @@ export default function LoginComponent() {
         </div>
         <p className="text-center text-small">
           Henüz bir hesabınız yok mu?&nbsp;
-          <Link href="#" size="sm">
+          <Link href="/sign-up" size="sm">
             Kaydol
           </Link>
         </p>

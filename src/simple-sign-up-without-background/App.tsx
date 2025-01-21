@@ -157,7 +157,7 @@ export default function SignUpComponent() {
         </div>
         <p className="text-center text-small">
           Zaten bir hesabınız var mı?&nbsp;
-          <Link href="#" size="sm">
+          <Link href="/" size="sm">
             Giriş Yap
           </Link>
         </p>
