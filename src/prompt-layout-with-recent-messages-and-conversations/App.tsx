@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
@@ -50,7 +48,8 @@ export default function Component() {
     const userMessage: Message = {
       role: "user",
       content: inputValue,
-      avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/3a906b3de8eaa53e14582edf5c918b5d.jpg",
+      avatar:
+        "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatars/3a906b3de8eaa53e14582edf5c918b5d.jpg",
       name: "Sen",
     }
 
@@ -70,12 +69,18 @@ export default function Component() {
       const response = await fetch(
         `https://derstech-backend.onrender.com/api/v1/demo/query?id=1&query=${encodeURIComponent(userInput)}`,
         {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "text/event-stream",
+            "Content-Type": "application/json",
           },
         },
       )
+
+      if (response.status === 403) {
+        throw new Error("Authentication failed. Please log in again.")
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -117,14 +122,19 @@ export default function Component() {
       console.error("Error fetching response:", error)
       setIsLoading(false)
 
-      const errorMessage: Message = {
-        role: "assistant",
-        content: `Bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`,
-        avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatar_ai.png",
-        name: "Dersitech",
-      }
+      if (error instanceof Error && error.message === "Authentication failed. Please log in again.") {
+        localStorage.removeItem("authToken")
+        navigate("/login")
+      } else {
+        const errorMessage: Message = {
+          role: "assistant",
+          content: `Bir hata oluştu: ${error instanceof Error ? error.message : String(error)}`,
+          avatar: "https://nextuipro.nyc3.cdn.digitaloceanspaces.com/components-images/avatar_ai.png",
+          name: "Dersitech",
+        }
 
-      setMessages((prevMessages) => [...prevMessages, errorMessage])
+        setMessages((prevMessages) => [...prevMessages, errorMessage])
+      }
     } finally {
       setIsLoading(false)
     }
